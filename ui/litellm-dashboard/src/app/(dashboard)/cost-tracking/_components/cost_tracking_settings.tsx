@@ -1,3 +1,4 @@
+import { CurrencySettings } from "@/components/currency/CurrencySettings";
 import React, { useState, useEffect } from "react";
 import type { ParseKeys } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -207,6 +208,8 @@ const CostTrackingSettings: React.FC<CostTrackingSettingsProps> = ({ userID, use
           <p className="text-muted-foreground mt-1">{t("costTracking.settings.description")}</p>
         </div>
       </div>
+
+      <CurrencySettings />
 
       {/* Main Content Card with Accordions */}
       <div className="bg-card rounded-lg shadow-sm w-full max-w-full space-y-4">

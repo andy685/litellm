@@ -7,6 +7,15 @@ from collections.abc import Mapping, Sequence
 from datetime import datetime
 from typing import TYPE_CHECKING, Final, Protocol, cast
 
+from pydantic import JsonValue, TypeAdapter, ValidationError
+
+from litellm.models.cost_accounting import (
+    CostAccountingSettings,
+    ExchangeRateCache,
+    ExchangeRateSnapshot,
+    InvalidAccountingSettings,
+)
+
 if TYPE_CHECKING:
     from litellm.proxy.utils import PrismaClient
 
@@ -114,6 +123,31 @@ class ConfigRepository:
             revision,
         )
         return bool(rows)
+
+    async def get_cost_accounting_settings(self) -> CostAccountingSettings | InvalidAccountingSettings:
+        try:
+            record: Final = await self.get_param("cost_accounting")
+            if record is None:
+                return CostAccountingSettings()
+            return CostAccountingSettings.model_validate(record.param_value)
+        except (json.JSONDecodeError, ValidationError):
+            return InvalidAccountingSettings()
+
+    async def save_cost_accounting_settings(self, settings: CostAccountingSettings, revision: int) -> bool:
+        payload: Final = TypeAdapter(dict[str, JsonValue]).validate_python(settings.model_dump(mode="json"))
+        return await self.set_param_if_revision("cost_accounting", payload, revision)
+
+    async def get_exchange_rate(self, key: str) -> ExchangeRateCache | None | InvalidAccountingSettings:
+        try:
+            record: Final = await self.get_param(f"cost_accounting_fx:{key}")
+            return None if record is None else ExchangeRateCache.model_validate(record.param_value)
+        except (json.JSONDecodeError, ValidationError):
+            return InvalidAccountingSettings()
+
+    async def save_exchange_rate(self, key: str, snapshot: ExchangeRateSnapshot, revision: int) -> bool:
+        cache: Final = ExchangeRateCache(revision=revision + 1, snapshot=snapshot)
+        payload: Final = TypeAdapter(dict[str, JsonValue]).validate_python(cache.model_dump(mode="json"))
+        return await self.set_param_if_revision(f"cost_accounting_fx:{key}", payload, revision)
 
     async def delete_param(self, param_name: str) -> bool:
         """Delete a config parameter from the database."""

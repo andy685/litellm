@@ -3738,6 +3738,95 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/cost/accounting/exchange-rate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Automatic Exchange Rate */
+        get: operations["get_automatic_exchange_rate_cost_accounting_exchange_rate_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cost/accounting/model-prices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Native Model Price */
+        patch: operations["update_native_model_price_cost_accounting_model_prices_patch"];
+        trace?: never;
+    };
+    "/cost/accounting/quote": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Quote Model Native Cost
+         * @description Estimate native cost using configured prices and automatically retrieved reference rates
+         */
+        post: operations["quote_model_native_cost_cost_accounting_quote_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/cost/accounting/rates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Accounting Rates */
+        get: operations["get_accounting_rates_cost_accounting_rates_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Accounting Rate */
+        patch: operations["update_accounting_rate_cost_accounting_rates_patch"];
+        trace?: never;
+    };
+    "/cost/accounting/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Accounting Settings */
+        get: operations["get_accounting_settings_cost_accounting_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/cost/estimate": {
         parameters: {
             query?: never;
@@ -26201,6 +26290,13 @@ export interface components {
                 [key: string]: string[];
             } | null;
         };
+        /** AccountingRatesResponse */
+        AccountingRatesResponse: {
+            /** Rates */
+            rates: components["schemas"]["MonthlyExchangeRate"][];
+            /** Revision */
+            revision: number;
+        };
         /**
          * AcknowledgedSafetyCheck
          * @description A pending safety check for the computer call.
@@ -30735,10 +30831,7 @@ export interface components {
             /** Field Value */
             field_value: unknown;
         };
-        /**
-         * ConfigGeneralSettings
-         * @description Documents all the fields supported by `general_settings` in config.yaml
-         */
+        /** ConfigGeneralSettings */
         ConfigGeneralSettings: {
             /**
              * Admission Queue Timeout Seconds
@@ -31216,6 +31309,12 @@ export interface components {
              * @description When true, `/models`, `/v1/models/{id}` and `/model/info` hide models whose backing deployments are all unhealthy, for every caller, without needing `healthy_only=true` per request. Requires `background_health_checks: true`, and keeps deployment health state cached without turning on `enable_health_check_routing`, so routing is unaffected. With no health state nothing is hidden. Hiding is presentation-only, a hidden model can still be called.
              */
             model_list_healthy_only?: boolean | null;
+            /**
+             * Native Cost Accounting
+             * @description Record native model cost estimates from configured prices without changing USD budgets or spend counters
+             * @default false
+             */
+            native_cost_accounting: boolean;
             /**
              * Otel
              * @description [BETA] OpenTelemetry support - this might change, use with caution.
@@ -31920,6 +32019,29 @@ export interface components {
              * @description Connection status: 'healthy' or 'unhealthy'
              */
             status: string;
+        };
+        /** CostAccountingSettings */
+        CostAccountingSettings: {
+            /**
+             * Model Prices
+             * @default []
+             */
+            model_prices: components["schemas"]["NativeModelPrice-Output"][];
+            /**
+             * Price History
+             * @default []
+             */
+            price_history: components["schemas"]["NativePriceVersion"][];
+            /**
+             * Rates
+             * @default []
+             */
+            rates: components["schemas"]["MonthlyExchangeRate"][];
+            /**
+             * Revision
+             * @default 0
+             */
+            revision: number;
         };
         /**
          * CostEstimateRequest
@@ -33385,6 +33507,48 @@ export interface components {
             }[];
             /** Updated At */
             updated_at?: number | null;
+        };
+        /** ExchangeRateResponse */
+        ExchangeRateResponse: {
+            snapshot: components["schemas"]["ExchangeRateSnapshot"];
+            /**
+             * Stale
+             * @default false
+             */
+            stale: boolean;
+        };
+        /** ExchangeRateSnapshot */
+        ExchangeRateSnapshot: {
+            /**
+             * Base
+             * @default USD
+             * @constant
+             */
+            base: "USD";
+            /**
+             * Fetched At
+             * Format: date-time
+             */
+            fetched_at: string;
+            /**
+             * Quote
+             * @default CNY
+             * @constant
+             */
+            quote: "CNY";
+            /**
+             * Rate Date
+             * Format: date
+             */
+            rate_date: string;
+            /**
+             * Source
+             * @default ECB
+             * @constant
+             */
+            source: "ECB";
+            /** Usd To Cny */
+            usd_to_cny: string;
         };
         /**
          * ExportType
@@ -39893,6 +40057,12 @@ export interface components {
             /** Model Name */
             model_name: string;
         };
+        /** ModelPriceUpdate */
+        ModelPriceUpdate: {
+            price: components["schemas"]["NativeModelPrice-Input"];
+            /** Revision */
+            revision: number;
+        };
         /** ModelResponse */
         ModelResponse: {
             /** Choices */
@@ -39918,6 +40088,49 @@ export interface components {
             by_model_group: boolean;
             /** Model */
             model: string;
+        };
+        /** MonthlyExchangeRate */
+        MonthlyExchangeRate: {
+            /**
+             * Locked
+             * @default false
+             */
+            locked: boolean;
+            /** Month */
+            month: string;
+            /**
+             * Rate Date
+             * Format: date
+             */
+            rate_date: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Updated By */
+            updated_by: string;
+            /** Usd To Cny */
+            usd_to_cny: string;
+        };
+        /** MonthlyRateUpdate */
+        MonthlyRateUpdate: {
+            /**
+             * Locked
+             * @default false
+             */
+            locked: boolean;
+            /** Month */
+            month: string;
+            /**
+             * Rate Date
+             * Format: date
+             */
+            rate_date: string;
+            /** Revision */
+            revision: number;
+            /** Usd To Cny */
+            usd_to_cny: number | string;
         };
         /**
          * Move
@@ -40014,6 +40227,155 @@ export interface components {
              * @constant
              */
             type: "namespace";
+        };
+        /** NativeCostQuote */
+        NativeCostQuote: {
+            /** Cny Amount */
+            cny_amount: string | null;
+            /** Month */
+            month: string;
+            /** Native Amount */
+            native_amount: string;
+            price: components["schemas"]["NativeModelPrice-Output"];
+            rate: components["schemas"]["MonthlyExchangeRate"] | null;
+            /** Revision */
+            revision: number;
+            usage: components["schemas"]["NativeUsage-Output"];
+            /** Usd Amount */
+            usd_amount: string | null;
+        };
+        /** NativeModelPrice */
+        "NativeModelPrice-Input": {
+            /** Cache Write Per Million */
+            cache_write_per_million?: number | string | null;
+            /** Cached Input Per Million */
+            cached_input_per_million?: number | string | null;
+            /**
+             * Currency
+             * @enum {string}
+             */
+            currency: "CNY" | "USD";
+            /** Input Per Million */
+            input_per_million?: number | string | null;
+            /** Model Id */
+            model_id: string;
+            /** Output Per Million */
+            output_per_million?: number | string | null;
+            /** Per Image */
+            per_image?: number | string | null;
+            /** Per Video Second */
+            per_video_second?: number | string | null;
+        };
+        /** NativeModelPrice */
+        "NativeModelPrice-Output": {
+            /** Cache Write Per Million */
+            cache_write_per_million?: string | null;
+            /** Cached Input Per Million */
+            cached_input_per_million?: string | null;
+            /**
+             * Currency
+             * @enum {string}
+             */
+            currency: "CNY" | "USD";
+            /** Input Per Million */
+            input_per_million?: string | null;
+            /** Model Id */
+            model_id: string;
+            /** Output Per Million */
+            output_per_million?: string | null;
+            /** Per Image */
+            per_image?: string | null;
+            /** Per Video Second */
+            per_video_second?: string | null;
+        };
+        /** NativePriceVersion */
+        NativePriceVersion: {
+            /**
+             * Effective From
+             * Format: date-time
+             */
+            effective_from: string;
+            price: components["schemas"]["NativeModelPrice-Output"];
+            /** Revision */
+            revision: number;
+            /** Updated By */
+            updated_by: string;
+        };
+        /** NativeQuoteRequest */
+        NativeQuoteRequest: {
+            /** Model Id */
+            model_id: string;
+            /** Month */
+            month: string;
+            usage: components["schemas"]["NativeUsage-Input"];
+        };
+        /** NativeUsage */
+        "NativeUsage-Input": {
+            /**
+             * Cache Write Tokens
+             * @default 0
+             */
+            cache_write_tokens: number;
+            /**
+             * Cached Input Tokens
+             * @default 0
+             */
+            cached_input_tokens: number;
+            /**
+             * Images
+             * @default 0
+             */
+            images: number;
+            /**
+             * Input Tokens
+             * @description Uncached input tokens, excluding cache reads and writes
+             * @default 0
+             */
+            input_tokens: number;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens: number;
+            /**
+             * Video Seconds
+             * @default 0
+             */
+            video_seconds: number | string;
+        };
+        /** NativeUsage */
+        "NativeUsage-Output": {
+            /**
+             * Cache Write Tokens
+             * @default 0
+             */
+            cache_write_tokens: number;
+            /**
+             * Cached Input Tokens
+             * @default 0
+             */
+            cached_input_tokens: number;
+            /**
+             * Images
+             * @default 0
+             */
+            images: number;
+            /**
+             * Input Tokens
+             * @description Uncached input tokens, excluding cache reads and writes
+             * @default 0
+             */
+            input_tokens: number;
+            /**
+             * Output Tokens
+             * @default 0
+             */
+            output_tokens: number;
+            /**
+             * Video Seconds
+             * @default 0
+             */
+            video_seconds: string;
         };
         /**
          * NewCustomerRequest
@@ -58861,6 +59223,176 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_automatic_exchange_rate_cost_accounting_exchange_rate_get: {
+        parameters: {
+            query?: {
+                as_of?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExchangeRateResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_native_model_price_cost_accounting_model_prices_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ModelPriceUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostAccountingSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    quote_model_native_cost_cost_accounting_quote_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NativeQuoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NativeCostQuote"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_accounting_rates_cost_accounting_rates_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AccountingRatesResponse"];
+                };
+            };
+        };
+    };
+    update_accounting_rate_cost_accounting_rates_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MonthlyRateUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostAccountingSettings"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_accounting_settings_cost_accounting_settings_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CostAccountingSettings"];
                 };
             };
         };

@@ -755,12 +755,25 @@ class DBSpendUpdateWriter:
             )
 
             llm_router: Final = get_llm_router()
-            payload: Final = get_logging_payload(
+            raw_payload: Final = get_logging_payload(
                 kwargs=kwargs,
                 response_obj=completion_response,
                 start_time=start_time,
                 end_time=end_time,
                 llm_router=llm_router,
+            )
+            from litellm.accounting.native_cost import capture_native_cost
+            from litellm.repositories.config_repository import ConfigRepository
+
+            payload: Final = (
+                await capture_native_cost(
+                    raw_payload,
+                    completion_response,
+                    ConfigRepository(prisma_client, use_writer=True),
+                    _is_settle_once_cost_row(raw_payload),
+                )
+                if proxy_settings.get("native_cost_accounting") is True
+                else raw_payload
             )
             billable_cost: Final = _billable_cost(response_cost, payload)
             payload["spend"] = billable_cost or 0.0

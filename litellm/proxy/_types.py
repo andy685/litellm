@@ -618,6 +618,8 @@ class LiteLLMRoutes(enum.Enum):
         *MODEL_LIST_ROUTES,
         "/sso/get/ui_settings",
         "/get/user_banner",
+        "/cost/accounting/rates",
+        "/cost/accounting/exchange-rate",
         "/get/latest_release_info",
     ]
 
@@ -2502,6 +2504,10 @@ DEFAULT_RESPONSES_WEBSOCKET_SESSION_LIMIT_SECONDS: Final[float] = 3600.0
 
 
 class ConfigGeneralSettings(LiteLLMPydanticObjectBase):
+    native_cost_accounting: bool = Field(
+        default=False,
+        description="Record native model cost estimates from configured prices without changing USD budgets or spend counters",
+    )
     """
     Documents all the fields supported by `general_settings` in config.yaml
     """

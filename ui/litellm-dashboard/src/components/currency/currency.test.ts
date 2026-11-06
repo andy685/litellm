@@ -10,6 +10,10 @@ import {
 const preferences: CurrencyPreferences = { currency: "CNY", usdToCny: 7.25, rateDate: "2000-01-01" };
 
 describe("display currency", () => {
+  it("retains the currency choice but discards previously entered manual rates", () => {
+    const saved = JSON.stringify({ currency: "USD", usdToCny: 9000, rateDate: "2000-01-01" });
+    expect(readCurrencyPreferences(saved)).toEqual({ ...DEFAULT_CURRENCY_PREFERENCES, currency: "USD" });
+  });
   it("defaults to CNY without inventing an exchange rate", () => {
     expect(readCurrencyPreferences(null)).toEqual(DEFAULT_CURRENCY_PREFERENCES);
     expect(convertMoney(10, "USD", DEFAULT_CURRENCY_PREFERENCES)).toEqual({

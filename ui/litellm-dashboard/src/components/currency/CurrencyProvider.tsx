@@ -1,6 +1,9 @@
 "use client";
 
 import { createContext, useContext, useMemo, useSyncExternalStore, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchAutomaticExchangeRate, type AutomaticExchangeRate } from "./exchangeRateApi";
 import {
   getLocalStorageItem,
   setLocalStorageItem,
@@ -47,26 +50,65 @@ const browserStore: CurrencyStore = {
 
 type CurrencyContextValue = Readonly<{
   preferences: CurrencyPreferences;
-  save: (preferences: CurrencyPreferences) => void;
+  save: (currency: Currency) => void;
+  exchangeRate?: AutomaticExchangeRate;
+  loading: boolean;
+  unavailable: boolean;
+  stale: boolean;
 }>;
 
-const CurrencyContext = createContext<CurrencyContextValue>({
+const defaultCurrencyContext: CurrencyContextValue = {
   preferences: DEFAULT_CURRENCY_PREFERENCES,
   save: () => undefined,
-});
+  loading: false,
+  unavailable: false,
+  stale: false,
+};
+
+const CurrencyContext = createContext<CurrencyContextValue>(defaultCurrencyContext);
 
 const serverSnapshot = () => null;
 
-export function CurrencyProvider({ children, store = browserStore }: { children: ReactNode; store?: CurrencyStore }) {
+export function CurrencyProvider({
+  children,
+  store = browserStore,
+  accessToken = null,
+}: {
+  children: ReactNode;
+  store?: CurrencyStore;
+  accessToken?: string | null;
+}) {
   const raw = useSyncExternalStore(store.subscribe, store.read, serverSnapshot);
+  const rateOptions = {
+    queryKey: ["costAccountingExchangeRate"],
+    queryFn: ({ signal }: { signal: AbortSignal }) => fetchAutomaticExchangeRate(accessToken, signal),
+    enabled: Boolean(accessToken),
+    staleTime: 15 * 60 * 1000,
+    refetchInterval: 60 * 60 * 1000,
+    retry: 1,
+  };
+  const rate = useQuery(rateOptions);
   const value = useMemo<CurrencyContextValue>(
     () => ({
-      preferences: readCurrencyPreferences(raw),
-      save: (preferences) => store.write(JSON.stringify(preferences)),
+      preferences: {
+        ...readCurrencyPreferences(raw),
+        usdToCny: rate.data?.snapshot.usd_to_cny ?? null,
+        rateDate: rate.data?.snapshot.rate_date ?? null,
+      },
+      save: (currency) => store.write(JSON.stringify({ currency })),
+      exchangeRate: rate.data,
+      loading: rate.isFetching && !rate.data,
+      unavailable: rate.isError && !rate.data,
+      stale: rate.isError || Boolean(rate.data?.stale),
     }),
-    [raw, store],
+    [raw, store, rate.data, rate.isFetching, rate.isError],
   );
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;
+}
+
+export function AuthenticatedCurrencyProvider({ children }: { children: ReactNode }) {
+  const { accessToken } = useAuth();
+  return <CurrencyProvider accessToken={accessToken}>{children}</CurrencyProvider>;
 }
 
 export function useDisplayCurrency() {

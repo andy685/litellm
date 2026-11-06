@@ -998,6 +998,9 @@ from litellm.proxy.spend_tracking.spend_management_endpoints import (
 from litellm.proxy.spend_tracking.spend_tracking_utils import get_logging_payload
 from litellm.proxy.tracing_runtime import manage_tracing
 from litellm.proxy.types_utils.utils import get_instance_fn
+from litellm.proxy.ui_crud_endpoints.cost_accounting_endpoints import (
+    router as cost_accounting_endpoints_router,
+)
 from litellm.proxy.ui_crud_endpoints.latest_release_endpoints import (
     router as latest_release_endpoints_router,
 )
@@ -22357,6 +22360,7 @@ app.include_router(rust_control_plane_router)
 app.include_router(ui_crud_endpoints_router)
 app.include_router(moyai_router)
 app.include_router(user_banner_endpoints_router)
+app.include_router(cost_accounting_endpoints_router)
 app.include_router(latest_release_endpoints_router)
 app.include_router(team_callback_router)
 app.include_router(budget_management_router)

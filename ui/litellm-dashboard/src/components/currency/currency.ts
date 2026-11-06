@@ -18,8 +18,10 @@ export const DEFAULT_CURRENCY_PREFERENCES: CurrencyPreferences = {
 export function readCurrencyPreferences(raw: string | null): CurrencyPreferences {
   if (raw === null) return DEFAULT_CURRENCY_PREFERENCES;
   try {
-    const result = currencyPreferencesSchema.safeParse(JSON.parse(raw));
-    return result.success ? result.data : DEFAULT_CURRENCY_PREFERENCES;
+    const result = currencyPreferencesSchema.pick({ currency: true }).safeParse(JSON.parse(raw));
+    return result.success
+      ? { ...DEFAULT_CURRENCY_PREFERENCES, currency: result.data.currency }
+      : DEFAULT_CURRENCY_PREFERENCES;
   } catch {
     return DEFAULT_CURRENCY_PREFERENCES;
   }
