@@ -688,12 +688,13 @@ class LiteLLMAnthropicToResponsesAPIAdapter:
         if isinstance(output_format, dict) and output_format.get("type") == "json_schema":
             schema: Final = output_format.get("schema")
             if schema:
+                strict: Final = output_format.get("strict")
                 responses_kwargs["text"] = {
                     "format": {
                         "type": "json_schema",
                         "name": "structured_output",
                         "schema": schema,
-                        "strict": output_format.get("strict", False),
+                        "strict": True if strict is None else strict,
                     }
                 }
 
