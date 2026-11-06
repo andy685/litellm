@@ -130,6 +130,11 @@ def test_invalid_rates_are_rejected(value: str) -> None:
         MonthlyRateUpdate(revision=0, month="2000-01", usd_to_cny=Decimal(value), rate_date=date(2000, 1, 1))
 
 
+def test_an_invalid_calendar_year_is_rejected_before_pricing() -> None:
+    with pytest.raises(ValidationError):
+        MonthlyRateUpdate(revision=0, month="0000-01", usd_to_cny=Decimal("7"), rate_date=date(2000, 1, 1))
+
+
 def test_quotes_keep_their_original_price_snapshot_after_a_price_change() -> None:
     price: Final = NativeModelPrice(model_id="fixture-deployment", currency="CNY", per_image=Decimal("1.25"))
     settings: Final = CostAccountingSettings(model_prices=(price,))

@@ -3,10 +3,18 @@ from datetime import date
 from decimal import Decimal
 from typing import Annotated, Final, Literal, Protocol, TypeAlias
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic import AfterValidator, AwareDatetime, BaseModel, ConfigDict, Field, StringConstraints, model_validator
+
+
+def _calendar_month(value: str) -> str:
+    date.fromisoformat(f"{value}-01")
+    return value
+
 
 AccountingCurrency: TypeAlias = Literal["CNY", "USD"]
-AccountingMonth: TypeAlias = Annotated[str, StringConstraints(pattern=r"^[0-9]{4}-(0[1-9]|1[0-2])$")]
+AccountingMonth: TypeAlias = Annotated[
+    str, StringConstraints(pattern=r"^[0-9]{4}-(0[1-9]|1[0-2])$"), AfterValidator(_calendar_month)
+]
 UnitPrice: TypeAlias = Annotated[Decimal, Field(ge=0, max_digits=24, decimal_places=12)]
 ExchangeRateValue: TypeAlias = Annotated[Decimal, Field(gt=0, max_digits=20, decimal_places=10)]
 

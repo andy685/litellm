@@ -45,7 +45,11 @@ async def _fetch_rate(
     params: Final = {
         "base": "usd",
         "quotes": "cny",
-        **({"from": (requested - timedelta(days=14)).isoformat(), "to": requested.isoformat()} if requested else {}),
+        **(
+            {"from": date.fromordinal(max(1, requested.toordinal() - 14)).isoformat(), "to": requested.isoformat()}
+            if requested
+            else {}
+        ),
     }
     try:
         response: Final = await client.get(EXCHANGE_RATE_URL, params=params, timeout=10, follow_redirects=False)

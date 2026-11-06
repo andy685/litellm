@@ -83,6 +83,15 @@ async def test_provider_failure_without_cache_does_not_invent_an_exchange_rate()
 
 
 @pytest.mark.asyncio
+async def test_history_window_cannot_underflow_the_supported_calendar() -> None:
+    store, prisma = _repository()
+    async with httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(404))) as client:
+        result: Final = await get_exchange_rate(store, client, NOW, date.min)
+    assert result == ExchangeRateUnavailable()
+    prisma.writer_db.query_raw.assert_not_called()
+
+
+@pytest.mark.asyncio
 async def test_failed_refresh_can_use_a_cache_created_by_another_worker() -> None:
     store, prisma = _repository()
     winner: Final = ExchangeRateCache(revision=1, snapshot=_snapshot())
