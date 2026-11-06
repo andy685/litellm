@@ -1,10 +1,11 @@
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import React from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import { formatCompact } from "@/app/(dashboard)/usage/_components/components/overview/overviewData";
 
 import type { UserActivityRow } from "../dailyActivityApi";
-import { formatUserSpend, userPrimaryLabel, userRowKey, userSecondaryLabel } from "./userActivityData";
+import { userPrimaryLabel, userRowKey, userSecondaryLabel } from "./userActivityData";
 
 const USER_ROW_GRID = "grid w-full grid-cols-[minmax(0,1fr)_5.5rem_4.5rem_5rem_4.5rem_5.5rem] items-center gap-3";
 
@@ -42,6 +43,7 @@ const UserActivityTable: React.FC<UserActivityTableProps> = ({
   onRetryNextPage,
 }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const firstPageFailed = failed && rows.length === 0;
   const body = (() => {
     if (firstPageFailed) {
@@ -78,7 +80,7 @@ const UserActivityTable: React.FC<UserActivityTableProps> = ({
             {rows.map((row) => (
               <li key={userRowKey(row)} className={`${USER_ROW_GRID} border-b py-2.5 pl-10 pr-4 last:border-b-0`}>
                 <UserCell row={row} />
-                <span className="text-right text-sm tabular-nums text-foreground">{formatUserSpend(row.spend)}</span>
+                <span className="text-right text-sm tabular-nums text-foreground">{format(row.spend)}</span>
                 <span className="text-right text-sm tabular-nums text-foreground">
                   {row.api_requests.toLocaleString()}
                 </span>

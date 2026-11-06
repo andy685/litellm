@@ -8,7 +8,7 @@ import { SimpleTooltip } from "@/components/ui/tooltip";
 import type { ParseKeys } from "i18next";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatNumberWithCommas } from "../../../../utils/dataUtils";
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import { transformKeyInfo } from "../../../key_team_helpers/transform_key_info";
 import { keyInfoV1Call } from "../../../networking";
 import KeyInfoView from "../../../templates/key_info_view";
@@ -50,6 +50,7 @@ interface TopKeyViewProps {
 
 const TopKeyView: React.FC<TopKeyViewProps> = ({ topKeys, teams, showTags = false, topKeysLimit, setTopKeysLimit }) => {
   const { t } = useTranslation();
+  const { format, currency } = useDisplayCurrency();
   const { accessToken } = useAuthorized();
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -171,7 +172,7 @@ const TopKeyView: React.FC<TopKeyViewProps> = ({ topKeys, teams, showTags = fals
                     </div>
                     <div>
                       <span className="text-muted-foreground">{t("usage.topKeys.tagTooltip.spend")}</span>{" "}
-                      {tag.usage > 0 && tag.usage < 0.01 ? "<$0.01" : `$${formatNumberWithCommas(tag.usage, 2)}`}
+                      {format(tag.usage)}
                     </div>
                   </div>
                 }
@@ -201,10 +202,10 @@ const TopKeyView: React.FC<TopKeyViewProps> = ({ topKeys, teams, showTags = fals
   };
 
   const spendColumn = {
-    header: t("usage.topKeys.columns.spend"),
+    header: currency === "USD" ? t("usage.topKeys.columns.spend") : `${t("usage.providerSpend.columns.spend")} (CNY)`,
     accessorKey: "spend",
     meta: { ...QUIET_HEADER, numeric: true },
-    cell: (info: any) => <MoneyCell value={info.getValue()} decimals={2} />,
+    cell: (info: any) => <MoneyCell displayCurrency value={info.getValue()} decimals={2} />,
   };
 
   const columns = showTags ? [...baseColumns, tagsColumn, spendColumn] : [...baseColumns, spendColumn];
@@ -244,7 +245,7 @@ const TopKeyView: React.FC<TopKeyViewProps> = ({ topKeys, teams, showTags = fals
             tickGap={5}
             layout="vertical"
             showLegend={false}
-            valueFormatter={(value) => `$${formatNumberWithCommas(value, 2)}`}
+            valueFormatter={format}
             onValueChange={(item) => handleKeyClick(item)}
             showTooltip={true}
             customTooltip={(props) => {
@@ -262,9 +263,7 @@ const TopKeyView: React.FC<TopKeyViewProps> = ({ topKeys, teams, showTags = fals
                     </div>
                     <div>
                       <span className="text-muted-foreground">{t("usage.topKeys.chartTooltip.spend")}</span>
-                      <span className="font-medium tabular-nums text-foreground">
-                        ${formatNumberWithCommas(item?.spend, 2)}
-                      </span>
+                      <span className="font-medium tabular-nums text-foreground">{format(item?.spend ?? 0)}</span>
                     </div>
                   </div>
                 </div>

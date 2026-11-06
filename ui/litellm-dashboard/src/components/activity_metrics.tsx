@@ -1,3 +1,4 @@
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import {
   AreaChart,
   BarChart,
@@ -45,8 +46,6 @@ const CHART_CLASS = "mt-1 h-56";
 
 const modelAverageResponseTimeMs = (metrics: ModelActivityData): number | null =>
   averageResponseTimeMs(metrics.total_response_time_ms ?? 0, metrics.total_timed_requests ?? 0);
-
-const formatSpend = (value: number) => `$${formatNumberWithCommas(value, 2, true)}`;
 
 export const ResponseTimeTooltip = ({ active, payload, label }: ChartTooltipProps) => (
   <ValueTooltip
@@ -133,6 +132,7 @@ const ModelTopKeys = ({
   fetchTopApiKeys: (model: string) => Promise<ModelTopKeysResponse>;
 }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   interface ModelTopKeyRow {
     api_key: string;
     key_alias: string | null;
@@ -234,7 +234,7 @@ const ModelTopKeys = ({
                 )}
               </div>
               <div className="shrink-0 text-right">
-                <p className="text-sm tabular-nums text-foreground">${formatNumberWithCommas(keyData.spend, 2)}</p>
+                <p className="text-sm tabular-nums text-foreground">{format(keyData.spend)}</p>
                 <p className="text-xs tabular-nums text-muted-foreground">
                   {t("activityMetrics.topKeys.usage", {
                     requests: keyData.requests.toLocaleString(),
@@ -262,6 +262,7 @@ export const ModelSection = ({
   fetchTopApiKeys?: (model: string) => Promise<ModelTopKeysResponse>;
 }) => {
   const { t } = useTranslation();
+  const { format, formatCompact: formatSpend } = useDisplayCurrency();
   return (
     <div className="grid gap-3">
       <StatStrip columns={5}>
@@ -289,7 +290,7 @@ export const ModelSection = ({
         <StatCell>
           <Stat
             label={t("activityMetrics.stats.totalSpend")}
-            value={<StatValue>${formatNumberWithCommas(metrics.total_spend, 2)}</StatValue>}
+            value={<StatValue>{format(metrics.total_spend)}</StatValue>}
             hint={t("activityMetrics.stats.spendPerRequest", {
               value: formatNumberWithCommas(metrics.total_spend / metrics.total_successful_requests, 3),
             })}
@@ -484,6 +485,7 @@ export const ActivityMetrics: React.FC<ActivityMetricsProps> = ({
   fetchTopApiKeys,
 }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const modelNames = Object.keys(modelMetrics).sort((a, b) => {
     if (a === "") return 1;
     if (b === "") return -1;
@@ -590,10 +592,7 @@ export const ActivityMetrics: React.FC<ActivityMetricsProps> = ({
             />
           </StatCell>
           <StatCell>
-            <Stat
-              label={t("activityMetrics.stats.totalSpend")}
-              value={<StatValue>${formatNumberWithCommas(totalSpend, 2)}</StatValue>}
-            />
+            <Stat label={t("activityMetrics.stats.totalSpend")} value={<StatValue>{format(totalSpend)}</StatValue>} />
           </StatCell>
         </StatStrip>
 
@@ -666,7 +665,7 @@ export const ActivityMetrics: React.FC<ActivityMetricsProps> = ({
                       </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-5 text-sm tabular-nums text-muted-foreground">
-                      <span className="text-foreground">${formatNumberWithCommas(metrics.total_spend, 2)}</span>
+                      <span className="text-foreground">{format(metrics.total_spend)}</span>
                       <span>
                         {t("activityMetrics.summary.requests", { requests: metrics.total_requests.toLocaleString() })}
                       </span>

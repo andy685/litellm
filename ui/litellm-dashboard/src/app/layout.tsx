@@ -11,6 +11,7 @@ import HotkeysProvider from "@/contexts/HotkeysProvider";
 import { TerminologyProvider } from "@/contexts/TerminologyContext";
 import { Toaster } from "@/components/ui/sonner";
 import I18nProvider from "@/i18n/I18nProvider";
+import { CurrencyProvider } from "@/components/currency/CurrencyProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -36,7 +37,9 @@ export default function RootLayout({
               <ReactQueryProvider>
                 <TerminologyProvider>
                   <HotkeysProvider>
-                    <AuthProvider>{children}</AuthProvider>
+                    <CurrencyProvider>
+                      <AuthProvider>{children}</AuthProvider>
+                    </CurrencyProvider>
                   </HotkeysProvider>
                 </TerminologyProvider>
                 <Toaster />

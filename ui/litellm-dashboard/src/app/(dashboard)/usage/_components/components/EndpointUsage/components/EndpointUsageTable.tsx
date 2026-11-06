@@ -117,7 +117,7 @@ const EndpointUsageTable: React.FC<EndpointUsageTableProps> = ({ endpointData })
       header: t("usage.endpointUsage.table.columns.spend"),
       accessorKey: "spend",
       meta: { numeric: true },
-      cell: ({ row }) => <MoneyCell value={row.original.spend} decimals={2} />,
+      cell: ({ row }) => <MoneyCell displayCurrency value={row.original.spend} decimals={2} />,
     },
   ];
 

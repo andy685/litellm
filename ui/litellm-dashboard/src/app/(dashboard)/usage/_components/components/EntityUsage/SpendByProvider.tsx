@@ -1,7 +1,7 @@
 import { STACKED_USAGE_PALETTE } from "@/components/shared/charts";
 import { DataTable } from "@/components/shared/DataTable";
 import { MoneyCell } from "@/components/shared/table_cells";
-import { formatNumberWithCommas } from "@/utils/dataUtils";
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import { Info, Server } from "lucide-react";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
@@ -55,11 +55,11 @@ const columns: ColumnDef<ProviderSpendData>[] = [
     cell: ({ row }) =>
       row.original.subscription_covered ? (
         <div className="flex items-center justify-end gap-2">
-          {row.original.spend > 0 && <MoneyCell value={row.original.spend} decimals={2} />}
+          {row.original.spend > 0 && <MoneyCell displayCurrency value={row.original.spend} decimals={2} />}
           <Badge variant="secondary">{i18n.t("usage.providerSpend.includedInSubscription")}</Badge>
         </div>
       ) : (
-        <MoneyCell value={row.original.spend} decimals={2} />
+        <MoneyCell displayCurrency value={row.original.spend} decimals={2} />
       ),
   },
   {
@@ -88,6 +88,7 @@ const columns: ColumnDef<ProviderSpendData>[] = [
  * usage views.
  */
 export function ProviderSpendBreakdown({ rows }: { rows: readonly ProviderSpendData[] }) {
+  const { format } = useDisplayCurrency();
   const { t } = useTranslation();
   const sorted = [...rows].sort((a, b) => b.spend - a.spend);
   const total = sorted.reduce((sum, row) => sum + row.spend, 0);
@@ -101,7 +102,7 @@ export function ProviderSpendBreakdown({ rows }: { rows: readonly ProviderSpendD
           <div className="flex items-baseline justify-between gap-3">
             <span className="text-xs text-muted-foreground">{t("usage.providerSpend.totalProviderSpend")}</span>
             <span data-testid="provider-spend-total" className="text-sm font-semibold tabular-nums">
-              ${formatNumberWithCommas(total, 2)}
+              {format(total)}
             </span>
           </div>
           <div className="flex h-2 w-full overflow-hidden rounded-full bg-muted">

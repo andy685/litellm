@@ -405,7 +405,7 @@ const EntityUsage: React.FC<EntityUsageProps> = ({
         header: t("usage.entityUsage.breakdownTable.spend"),
         accessorKey: "metrics.spend",
         meta: { numeric: true, ...QUIET_HEADER },
-        cell: ({ row }) => <MoneyCell value={row.original.metrics.spend} decimals={4} />,
+        cell: ({ row }) => <MoneyCell displayCurrency value={row.original.metrics.spend} decimals={4} />,
       },
       {
         header: t("usage.entityUsage.breakdownTable.successful"),

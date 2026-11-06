@@ -1,3 +1,4 @@
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import { BarChart } from "@/components/shared/charts";
 import { DataTable } from "@/components/shared/DataTable";
 import { MoneyCell } from "@/components/shared/table_cells";
@@ -5,7 +6,7 @@ import { ProviderLogo } from "@/components/molecules/models/ProviderLogo";
 import type { ParseKeys } from "i18next";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { formatNumberWithCommas } from "@/utils/dataUtils";
+
 import { Segmented } from "../overview/Primitives";
 import { providerForModel } from "../overview/modelProvider";
 
@@ -53,6 +54,7 @@ function ModelName({ name }: { name: string | undefined }) {
 
 export default function TopModelView({ topModels, topModelsLimit, setTopModelsLimit }: TopModelViewProps) {
   const { t } = useTranslation();
+  const { currency, format } = useDisplayCurrency();
   const [modelViewMode, setModelViewMode] = useState<ViewMode>("table");
 
   const columns = [
@@ -63,10 +65,13 @@ export default function TopModelView({ topModels, topModelsLimit, setTopModelsLi
       cell: (info: any) => <ModelName name={info.getValue()} />,
     },
     {
-      header: t("usage.topModelView.columns.spendUsd"),
+      header:
+        currency === "USD"
+          ? t("usage.topModelView.columns.spendUsd")
+          : `${t("usage.providerSpend.columns.spend")} (CNY)`,
       accessorKey: "spend",
       meta: { numeric: true, ...QUIET_HEADER },
-      cell: (info: any) => <MoneyCell value={info.getValue()} decimals={2} />,
+      cell: (info: any) => <MoneyCell displayCurrency value={info.getValue()} decimals={2} />,
     },
     {
       header: t("usage.topModelView.columns.successful"),
@@ -114,7 +119,7 @@ export default function TopModelView({ topModels, topModelsLimit, setTopModelsLi
             index="key"
             categories={["spend"]}
             colors={[BAR_COLOR]}
-            valueFormatter={(value) => `$${formatNumberWithCommas(value, 2)}`}
+            valueFormatter={format}
             layout="vertical"
             yAxisWidth={200}
             tickGap={5}

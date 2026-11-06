@@ -1,10 +1,15 @@
+import i18n from "@/i18n/i18n";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import React from "react";
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { beforeEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { ActivityMetrics, formatKeyLabel, processActivityData, ResponseTimeTooltip } from "./activity_metrics";
 import type { ChartTooltipProps } from "@/components/shared/charts";
 import { Team } from "./key_team_helpers/key_list";
 import { DailyData, KeyMetricWithMetadata, ModelActivityData } from "./UsagePage/types";
+
+beforeEach(async () => {
+  await i18n.changeLanguage("en");
+});
 
 beforeAll(() => {
   if (typeof window !== "undefined" && !window.ResizeObserver) {

@@ -1,12 +1,9 @@
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import { KeyRound, Search, X } from "lucide-react";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
-import {
-  formatCompact,
-  formatUsd,
-  type SeriesDay,
-} from "@/app/(dashboard)/usage/_components/components/overview/overviewData";
+import { formatCompact, type SeriesDay } from "@/app/(dashboard)/usage/_components/components/overview/overviewData";
 import { Panel, Sparkline, Stat } from "@/app/(dashboard)/usage/_components/components/overview/Primitives";
 import { ModelCollapsible, ModelSection } from "@/components/activity_metrics";
 import type { Team } from "@/components/key_team_helpers/key_list";
@@ -123,6 +120,7 @@ interface KeySummaryStripProps {
 
 const KeySummaryStrip: React.FC<KeySummaryStripProps> = ({ summary, loading, hidePromptCachingMetrics }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const daily = useMemo(() => summarySeries(summary), [summary]);
   const trend = (dataKey: string) =>
     loading || daily.length < 2 ? undefined : (
@@ -142,7 +140,7 @@ const KeySummaryStrip: React.FC<KeySummaryStripProps> = ({ summary, loading, hid
         <h3 className="sr-only">{t("usage.keyActivity.overallUsage")}</h3>
       )}
       <StatCell trend={trend("spend")}>
-        <Stat label={t("usage.keyActivity.stats.spend")} value={formatUsd(summary.total_spend)} pending={loading} />
+        <Stat label={t("usage.keyActivity.stats.spend")} value={format(summary.total_spend)} pending={loading} />
       </StatCell>
       <StatCell trend={trend("requests")}>
         <Stat
@@ -183,7 +181,7 @@ const KeySummaryStrip: React.FC<KeySummaryStripProps> = ({ summary, loading, hid
       <StatCell>
         <Stat
           label={t("usage.keyActivity.stats.avgCost")}
-          value={formatUsd(avgCost, 4)}
+          value={format(avgCost, 4)}
           pending={loading}
           hint={
             loading || hidePromptCachingMetrics
@@ -208,6 +206,7 @@ const KeyActivityPanel: React.FC<KeyActivityPanelProps> = ({
   hidePromptCachingMetrics = false,
 }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const [queryState, setQueryState] = useState<{ scope: FetchKeyPage; value: string } | null>(null);
   const query = queryState?.scope === fetchKeyPage ? queryState.value : "";
   const updateQuery = useCallback((value: string) => setQueryState({ scope: fetchKeyPage, value }), [fetchKeyPage]);
@@ -430,7 +429,7 @@ const KeyActivityPanel: React.FC<KeyActivityPanelProps> = ({
                 />
               </div>
             </div>
-            <span className="text-right text-sm tabular-nums text-foreground">{formatUsd(metrics.total_spend)}</span>
+            <span className="text-right text-sm tabular-nums text-foreground">{format(metrics.total_spend)}</span>
             <span className="text-right text-sm tabular-nums text-muted-foreground">
               {metrics.total_requests.toLocaleString()}{" "}
               <span className="sr-only">{t("usage.keyActivity.requestsSrOnly")}</span>

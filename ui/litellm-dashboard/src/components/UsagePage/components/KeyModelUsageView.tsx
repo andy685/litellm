@@ -3,7 +3,7 @@ import { DataTable } from "@/components/shared/DataTable";
 import { MoneyCell } from "@/components/shared/table_cells";
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import i18n from "@/i18n/i18n";
-import { formatNumberWithCommas } from "@/utils/dataUtils";
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import type { ColumnDef } from "@tanstack/react-table";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -27,7 +27,7 @@ const columns: ColumnDef<TopModelData>[] = [
     header: () => i18n.t("usage.keyModelUsage.columns.spend"),
     accessorKey: "spend",
     meta: { numeric: true },
-    cell: ({ row }) => <MoneyCell value={row.original.spend} decimals={2} />,
+    cell: ({ row }) => <MoneyCell displayCurrency value={row.original.spend} decimals={2} />,
   },
   {
     header: () => i18n.t("usage.keyModelUsage.columns.successful"),
@@ -51,6 +51,7 @@ const columns: ColumnDef<TopModelData>[] = [
 
 const KeyModelUsageView: React.FC<KeyModelUsageViewProps> = ({ topModels }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const [viewMode, setViewMode] = useState<"chart" | "table">("table");
 
   if (topModels.length === 0) {
@@ -87,7 +88,7 @@ const KeyModelUsageView: React.FC<KeyModelUsageViewProps> = ({ topModels }) => {
               index="key"
               categories={["spend"]}
               colors={["cyan"]}
-              valueFormatter={(value) => `$${formatNumberWithCommas(value, 2)}`}
+              valueFormatter={format}
               layout="vertical"
               yAxisWidth={180}
               tickGap={5}

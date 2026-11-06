@@ -106,6 +106,7 @@ import SubscriptionCosts from "./SubscriptionCost/SubscriptionCosts";
 import { useTagSummary } from "@/app/(dashboard)/hooks/tags/useTagSummary";
 import { Panel } from "./overview/Primitives";
 import UsageOverview from "./overview/UsageOverview";
+import { CurrencyNotice } from "@/components/currency/CurrencySettings";
 
 interface UsagePageProps {
   teams: Team[];
@@ -456,6 +457,9 @@ const UsagePage: React.FC<UsagePageProps> = ({ teams, organizations, teamsLoadin
 
   return (
     <div ref={pageRef} className="relative w-full px-4 pt-3 pb-8 sm:px-6">
+      <div className="mb-3">
+        <CurrencyNotice />
+      </div>
       <header className="mb-3 flex w-full flex-wrap items-center justify-between gap-3 border-b pb-3">
         <UsageViewSelect
           value={usageView}

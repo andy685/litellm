@@ -51,7 +51,7 @@ const columns: ColumnDef<TeamUserSpendRow>[] = [
     header: () => i18n.t("usage.teamUserSpend.columns.spend"),
     accessorKey: "spend",
     meta: { numeric: true, ...QUIET_HEADER },
-    cell: ({ row }) => <MoneyCell value={row.original.spend} decimals={4} />,
+    cell: ({ row }) => <MoneyCell displayCurrency value={row.original.spend} decimals={4} />,
   },
   {
     header: () => i18n.t("usage.teamUserSpend.columns.requests"),

@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import React, { useMemo } from "react";
 import type { ParseKeys } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -138,6 +139,7 @@ export function Leaderboard({
   colorByKey?: ReadonlyMap<string, string>;
 }) {
   const { t } = useTranslation();
+  const { formatCompact } = useDisplayCurrency();
   const colorOf = (name: string) => {
     if (colorByKey) return colorForModel(name, colorByKey);
     const index = series.labels.indexOf(name);
@@ -182,7 +184,7 @@ export function Leaderboard({
                 <span className="block text-sm tabular-nums text-foreground">{row.share.toFixed(1)}%</span>
                 {!dense && (
                   <span className="block text-xs tabular-nums text-muted-foreground">
-                    {formatMetricValue(value(row), metric)}
+                    {metric === "spend" ? formatCompact(value(row)) : formatMetricValue(value(row), metric)}
                   </span>
                 )}
               </span>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { CurrencySettings } from "@/components/currency/CurrencySettings";
 import ThemeToggle from "@/components/ThemeToggle/ThemeToggle";
 import { usePathname } from "next/navigation";
 import { useTerminology } from "@/contexts/TerminologyContext";
@@ -64,6 +65,7 @@ export function DashboardHeader({
           <DashboardCommunityLinks
             className={showWorkerSelector ? "hidden @min-[840px]:flex" : "hidden @min-[400px]:flex"}
           />
+          <CurrencySettings />
           <ThemeToggle />
           {deploymentHealth}
           <NotificationsBell accessToken={accessToken} deploymentHealthLink={deploymentHealthLink} />

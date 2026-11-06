@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import React, { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import type { DailyData } from "@/components/UsagePage/types";
@@ -27,13 +28,14 @@ export default function UsageStatStrip({
   budget,
 }: UsageStatStripProps) {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const daily = useMemo(() => dailyTotals(results), [results]);
   return (
     <div className="grid grid-cols-1 overflow-hidden rounded-xl border bg-card sm:grid-cols-2 lg:grid-cols-4 lg:divide-x">
       <StatCell trend={<Sparkline data={daily} dataKey="spend" color={BRAND} className="h-14" />}>
         <Stat
           label={t("usage.statStrip.spend")}
-          value={formatUsd(totals.spend)}
+          value={format(totals.spend)}
           pending={loading}
           hint={budget ? t("usage.statStrip.budgetHint", { budget: formatUsd(budget) }) : t("usage.statStrip.noBudget")}
         />
@@ -118,7 +120,7 @@ export default function UsageStatStrip({
         <div className="grid gap-3">
           <Stat
             label={t("usage.statStrip.avgCostPerRequest")}
-            value={formatUsd(totals.avgCostPerRequest, 4)}
+            value={format(totals.avgCostPerRequest, 4)}
             pending={loading}
           />
           <Stat

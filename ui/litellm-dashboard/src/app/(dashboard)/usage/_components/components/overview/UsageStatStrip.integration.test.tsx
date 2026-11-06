@@ -1,8 +1,13 @@
+import i18n from "@/i18n/i18n";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { OverviewTotals } from "./overviewData";
 import UsageStatStrip from "./UsageStatStrip";
+
+beforeEach(async () => {
+  await i18n.changeLanguage("en");
+});
 
 const totals: OverviewTotals = {
   spend: 42.5,

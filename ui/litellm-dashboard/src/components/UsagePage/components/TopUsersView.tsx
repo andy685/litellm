@@ -1,8 +1,9 @@
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import type { FetchUserPage } from "./userActivityData";
-import { formatUserSpend, userPrimaryLabel, userRowKey, userSecondaryLabel } from "./userActivityData";
+import { userPrimaryLabel, userRowKey, userSecondaryLabel } from "./userActivityData";
 import type { UserActivityRow } from "../dailyActivityApi";
 
 const TOP_USERS_LIMIT = 10;
@@ -14,6 +15,7 @@ interface TopUsersViewProps {
 
 const TopUsersView: React.FC<TopUsersViewProps> = ({ fetchUserPage }) => {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const [state, setState] = useState<{
     scope: FetchUserPage;
     rows: UserActivityRow[];
@@ -94,7 +96,7 @@ const TopUsersView: React.FC<TopUsersViewProps> = ({ fetchUserPage }) => {
                 />
               </div>
             </div>
-            <span className="text-right text-sm tabular-nums text-foreground">{formatUserSpend(row.spend)}</span>
+            <span className="text-right text-sm tabular-nums text-foreground">{format(row.spend)}</span>
             <span className="text-right text-sm tabular-nums text-muted-foreground">
               {row.api_requests.toLocaleString()}
             </span>

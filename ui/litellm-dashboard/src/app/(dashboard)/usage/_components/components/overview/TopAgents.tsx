@@ -1,5 +1,7 @@
 "use client";
 
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
+
 import { useTerminology } from "@/contexts/TerminologyContext";
 import React, { useMemo, useState } from "react";
 import type { ParseKeys } from "i18next";
@@ -13,7 +15,6 @@ import {
   bucketTotals,
   labelForDate,
   formatCompact,
-  formatCompactUsd,
   formatMetricValue,
   seriesBy,
   type UsageMetric,
@@ -90,6 +91,7 @@ function AgentItem({
   onOpen?: (agent: AgentRow) => void;
 }) {
   const { t } = useTranslation();
+  const { formatCompact: formatMoneyCompact } = useDisplayCurrency();
   const term = useTerminology();
   const openRow = onOpen && agent.tags.length > 0 ? () => onOpen(agent) : undefined;
   const content = (
@@ -121,7 +123,7 @@ function AgentItem({
           {t("usage.topAgents.tokens", { tokens: formatCompact(agent.tokens) })}
         </span>
         <span className="block text-xs tabular-nums text-muted-foreground">
-          {formatCompactUsd(agent.spend)} · {share.toFixed(1)}%
+          {formatMoneyCompact(agent.spend)} · {share.toFixed(1)}%
         </span>
       </span>
     </>
@@ -178,6 +180,7 @@ export default function TopAgents({
   onOpenAgent?: (agent: AgentRow) => void;
 }) {
   const { t } = useTranslation();
+  const { formatCompact: formatMoneyCompact } = useDisplayCurrency();
   const [metric, setMetric] = useState<UsageMetric>("tokens");
   const allAgents = useMemo(() => topAgents(rows ?? []), [rows]);
   const agents = useMemo(
@@ -229,7 +232,7 @@ export default function TopAgents({
             colors={series.colors}
             xKey="date"
             xLabel={(date) => labelForDate(series, date)}
-            format={(value) => formatMetricValue(value, metric)}
+            format={(value) => (metric === "spend" ? formatMoneyCompact(value) : formatMetricValue(value, metric))}
             totalFor={(date) => totalsByDay.get(date)}
             className="h-64"
           />

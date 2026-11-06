@@ -1,5 +1,7 @@
 "use client";
 
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
+
 import { useMemo } from "react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -24,7 +26,7 @@ import { topAgents, type AgentRow } from "./overview/agentCatalog";
 import { useClientAgentModels } from "../hooks/useClientAgentModels";
 import UsageBreakdownChart from "./overview/UsageBreakdownChart";
 import { clientAgentDetail, type ClientAgentDetail } from "./overview/clientAgentDetail";
-import { modelColorMap, formatCompact, formatUsd, overviewTotals } from "./overview/overviewData";
+import { modelColorMap, formatCompact, overviewTotals } from "./overview/overviewData";
 import { reconciledTokenBreakdown } from "./overview/tokenBreakdown";
 import { Panel, Stat } from "./overview/Primitives";
 import { AgentMark } from "./overview/TopAgents";
@@ -85,6 +87,7 @@ export default function ClientUsagePanel({
   onRetry,
 }: ClientUsagePanelProps) {
   const { t } = useTranslation();
+  const { format } = useDisplayCurrency();
   const label = client === "claude-desktop" ? "Claude Desktop" : "Claude Code";
   const scopedRequest = Boolean(userId || teamId) && !accessError;
   const personRequest = {
@@ -265,7 +268,7 @@ export default function ClientUsagePanel({
           {ready && summary && (
             <>
               <div className="grid grid-cols-3 divide-x overflow-hidden rounded-xl border bg-card py-4">
-                <SummaryStat label={t("usage.clientPanel.summary.spend")} value={formatUsd(summary.spend)} />
+                <SummaryStat label={t("usage.clientPanel.summary.spend")} value={format(summary.spend)} />
                 <SummaryStat label={t("usage.clientPanel.summary.totalTokens")} value={formatCompact(summary.tokens)} />
                 <SummaryStat
                   label={t("usage.clientPanel.summary.requests")}

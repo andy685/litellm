@@ -1,5 +1,6 @@
 "use client";
 
+import { useDisplayCurrency } from "@/components/currency/CurrencyProvider";
 import { useMemo, useState } from "react";
 import type { ParseKeys } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -49,6 +50,7 @@ export default function UsageBreakdownChart({
   dimension = "model_groups",
 }: UsageBreakdownChartProps) {
   const { t } = useTranslation();
+  const { formatCompact } = useDisplayCurrency();
   const [metric, setMetric] = useState<UsageMetric>("spend");
   const state: BreakdownState = { metric, dimension };
   const [granularity, setGranularity] = useState<Granularity>("day");
@@ -57,7 +59,8 @@ export default function UsageBreakdownChart({
   const { series: dailySeries, ranking } = useBreakdown(results, state, 8, modelColors);
   const series = useMemo(() => bucketSeries(dailySeries, granularity), [dailySeries, granularity]);
   const totalsByBucket = useMemo(() => bucketTotals(series), [series]);
-  const format = (value: number) => formatMetricValue(value, state.metric);
+  const format = (value: number) =>
+    state.metric === "spend" ? formatCompact(value) : formatMetricValue(value, state.metric);
 
   return (
     <Panel
